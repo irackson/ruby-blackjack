@@ -114,7 +114,11 @@ class Player
       sum += k.value if k.value != 11
     end
     aces.map do |k, _|
-      sum += 1 if (sum + k.value) > 21
+      if (sum + k.value) > 21
+        sum += 1
+      elsif (sum + k.value) <= 21
+        sum += k.value
+      end
     end
     sum
   end
@@ -142,6 +146,11 @@ class Computer < Player
 
   def print_first
     e = @hand[0]
+    puts "#{e.suit}, #{e.value}, #{e.face}"
+  end
+
+  def print_second
+    e = @hand[1]
     puts "#{e.suit}, #{e.value}, #{e.face}"
   end
 end
@@ -184,26 +193,33 @@ while cmd != 'q'
     human_sum = human.sum_hand
     puts "#{human.name}'s Sum: #{human_sum}"
 
-    # puts "#{house.name}'s First Card: "
-    # house.print_first
-    puts "#{house.name}'s Hand: "
-    house.print_hand
+    puts "#{house.name}'s First Card: "
+    house.print_first
+    # puts "#{house.name}'s Hand: "
+    # house.print_hand
     house_sum = house.sum_hand
-    puts "#{house.name}'s Sum: #{house_sum}"
+    # puts "#{house.name}'s Sum: #{house_sum}"
 
     if (human_sum == 21) && (house_sum == 21)
+      puts 'Blackjacks for everyone!'
+      puts "#{house.name}'s Hidden Card: "
+      house.print_second
       in_round = false
       game.round_winner = 'tie'
       game.balance_tie
       game.end_round
       next
     elsif human_sum == 21
+      puts 'You got Blackjack!'
       in_round = false
       game.round_winner = human.name
       game.reward_human
       game.end_round
       next
     elsif house_sum == 21
+      puts 'Dealer dealt themselves Blackjack :('
+      puts "#{house.name}'s Hidden Card: "
+      house.print_second
       in_round = false
       game.round_winner = house.name
       game.end_round
@@ -212,11 +228,6 @@ while cmd != 'q'
     end
   elsif (cmd == 's') && in_round
     puts 'you have decided to stay'
-    # TODO: play out dealer
-    in_round = false
-  elsif (cmd == 'h') && in_round
-    puts 'you have decided to hit'
-    game.deal_one(human)
 
     puts "#{human.name}'s Hand: "
     human.print_hand
@@ -229,6 +240,53 @@ while cmd != 'q'
     house.print_hand
     house_sum = house.sum_hand
     puts "#{house.name}'s Sum: #{house_sum}"
+
+    while house_sum < 17
+      game.deal_one(house)
+      house_sum = house.sum_hand
+      puts "#{house.name} hits. Hand: "
+      house.print_hand
+      puts "#{house.name}'s Sum: #{house_sum}"
+    end
+
+    if house_sum > 21
+      puts "#{house.name} busts at #{house_sum}!"
+      game.round_winner = human.name
+      game.reward_human
+      game.end_round
+      in_round = false
+      next
+    else
+      puts "#{house.name} must stand at #{house_sum}"
+    end
+
+    if human_sum == house_sum
+      game.round_winner = 'tie'
+      game.balance_tie
+    end
+    if human_sum > house_sum
+      game.round_winner = human.name
+      game.reward_human
+    end
+    game.round_winner = house.name if human_sum < house_sum
+    game.end_round
+    in_round = false
+
+  elsif (cmd == 'h') && in_round
+    puts 'you have decided to hit'
+    game.deal_one(human)
+
+    puts "#{human.name}'s Hand: "
+    human.print_hand
+    human_sum = human.sum_hand
+    puts "#{human.name}'s Sum: #{human_sum}"
+
+    puts "#{house.name}'s First Card: "
+    house.print_first
+    # puts "#{house.name}'s Hand: "
+    # house.print_hand
+    house_sum = house.sum_hand
+    # puts "#{house.name}'s Sum: #{house_sum}"
 
     if (human_sum == 21) && (house_sum == 21)
       in_round = false
