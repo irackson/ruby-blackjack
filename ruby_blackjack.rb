@@ -15,10 +15,10 @@ class Game
   end
 
   def compose_deck
+    @num_decks -= 1
     empty_deck
     fill_deck
     shuffle_deck
-    @num_decks -= 1
   end
 
   def empty_deck
@@ -26,15 +26,15 @@ class Game
   end
 
   def fill_deck
-    suits = %w[diamonds clubs hearts spades]
+    suits = %w[♠ ♥ ♦ ♣]
     (0..(suits.length - 1)).each do |s|
-      @deck.push(Card.new(11, suits[s], 'ace'))
+      @deck.push(Card.new(11, suits[s], '🂡'))
       (1..9).each do |c|
-        @deck.push(Card.new((c + 1), suits[s], 'numbered'))
+        @deck.push(Card.new((c + 1), suits[s], '#'))
       end
-      @deck.push(Card.new(10, suits[s], 'jack'))
-      @deck.push(Card.new(10, suits[s], 'queen'))
-      @deck.push(Card.new(10, suits[s], 'king'))
+      @deck.push(Card.new(10, suits[s], '🂫'))
+      @deck.push(Card.new(10, suits[s], '🂭'))
+      @deck.push(Card.new(10, suits[s], '🂮'))
     end
   end
 
@@ -65,8 +65,13 @@ class Game
   end
 
   def deal_one(player)
-    @human_player.hand.push(@deck.shift) if player.instance_of?(Human)
-    @computer_dealer.hand.push(@deck.shift) if player.instance_of?(Computer)
+    bottom_card = @deck.shift
+    if bottom_card
+      @human_player.hand.push(bottom_card) if player.instance_of?(Human)
+      @computer_dealer.hand.push(bottom_card) if player.instance_of?(Computer)
+    else
+      puts 'no cards remaining. all decks used. now is probably a good time to (q)uit?'
+    end
   end
 
   def swap_anti
@@ -102,7 +107,7 @@ class Player
   end
 
   def print_hand
-    @hand.each { |e| puts "#{e.suit}, #{e.value}, #{e.face}" }
+    @hand.each { |e| puts "#{e.value} #{e.suit} [#{e.face}]" }
   end
 
   def sum_hand
@@ -146,12 +151,12 @@ class Computer < Player
 
   def print_first
     e = @hand[0]
-    puts "#{e.suit}, #{e.value}, #{e.face}"
+    puts "#{e.value} #{e.suit} [#{e.face}]"
   end
 
   def print_second
     e = @hand[1]
-    puts "#{e.suit}, #{e.value}, #{e.face}"
+    puts "#{e.value} #{e.suit} [#{e.face}]"
   end
 end
 
@@ -171,15 +176,20 @@ end
 puts 'Welcome to ruby blackjack!'
 puts 'Please enter your name'
 human_name = gets.chomp
+# puts "Hello, #{human_name}! How many decks would you like to play with?"
+# deck_num = gets.chomp.to_i + 1
+
 human = Human.new human_name, 1000
 house = Computer.new
-game = Game.new human, house, 5
+game = Game.new human, house, 99
 # game.deck.each { |e| puts "#{e.suit}, #{e.value}, #{e.face}" }
+
 puts 'Enter (d) to play a round. Enter (q) at any time to quit.'
 
 cmd = ''
 in_round = false
 while cmd != 'q'
+  # puts "remaining in deck: #{game.deck.length}, remaining packs: #{game.num_decks}"
   cmd = gets.chomp
   if (cmd == 'd') && !in_round
     in_round = true
@@ -195,10 +205,7 @@ while cmd != 'q'
 
     puts "#{house.name}'s First Card: "
     house.print_first
-    # puts "#{house.name}'s Hand: "
-    # house.print_hand
     house_sum = house.sum_hand
-    # puts "#{house.name}'s Sum: #{house_sum}"
 
     if (human_sum == 21) && (house_sum == 21)
       puts 'Blackjacks for everyone!'
@@ -233,9 +240,6 @@ while cmd != 'q'
     human.print_hand
     human_sum = human.sum_hand
     puts "#{human.name}'s Sum: #{human_sum}"
-
-    # puts "#{house.name}'s First Card: "
-    # house.print_first
     puts "#{house.name}'s Hand: "
     house.print_hand
     house_sum = house.sum_hand
@@ -283,10 +287,7 @@ while cmd != 'q'
 
     puts "#{house.name}'s First Card: "
     house.print_first
-    # puts "#{house.name}'s Hand: "
-    # house.print_hand
     house_sum = house.sum_hand
-    # puts "#{house.name}'s Sum: #{house_sum}"
 
     if (human_sum == 21) && (house_sum == 21)
       in_round = false
