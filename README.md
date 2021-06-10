@@ -1,4 +1,4 @@
-# Ruby BlackJack
+# Ruby BlackJack [![wakatime](https://wakatime.com/badge/github/irackson/ruby-blackjack.svg)](https://wakatime.com/badge/github/irackson/ruby-blackjack)
 
 ## by Ian Rackson
 
