@@ -194,6 +194,7 @@ while cmd != 'q'
   if (cmd == 'd') && !in_round
     in_round = true
     game.swap_anti
+    puts ''
     puts "#{human.name} bets $10. bankroll = $#{human.bankroll}"
     puts "#{house.name} holds bet. bankroll = $#{house.bankroll}"
     game.deal
